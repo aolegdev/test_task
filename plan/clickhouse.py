@@ -7,18 +7,21 @@ from django.conf import settings
 client = None
 
 
-def connect():
+def get_client():
     global client
-    if client is not None:
-        return
-    client = clickhouse_connect.get_client(
-        host=settings.CLICKHOUSE["HOST"],
-        port=settings.CLICKHOUSE["PORT"],
-        username=settings.CLICKHOUSE["USER"],
-        password=settings.CLICKHOUSE["PASSWORD"],
-        database=settings.CLICKHOUSE["DATABASE"],
-    )
-    client.command(
+    if client is None:
+        client = clickhouse_connect.get_client(
+            host=settings.CLICKHOUSE["HOST"],
+            port=settings.CLICKHOUSE["PORT"],
+            username=settings.CLICKHOUSE["USER"],
+            password=settings.CLICKHOUSE["PASSWORD"],
+            database=settings.CLICKHOUSE["DATABASE"],
+        )
+    return client
+
+
+def create_tables():
+    get_client().command(
         """
         CREATE TABLE IF NOT EXISTS work_volume_record (
             id UInt64,
@@ -44,7 +47,7 @@ def close():
 
 
 def save_work_volume_record(factory, start, finish, weight, author, created):
-    client.insert(
+    get_client().insert(
         "work_volume_record",
         [
             [

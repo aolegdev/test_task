@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+from django.db import transaction
 from django.utils import timezone as django_timezone
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -50,32 +51,32 @@ class WorkVolumeListView(APIView):
 
         start = datetime.fromtimestamp(values["start"], tz=timezone.utc).date()
         finish = datetime.fromtimestamp(values["finish"], tz=timezone.utc).date()
+
+        if start > finish or values["weight"] < 0:
+            return error(406, 279)
+
         created = django_timezone.now().date()
 
-        volume = WorkVolume.objects.filter(
-            factory=factory,
-            start=start,
-            finish=finish,
-        ).first()
-        if volume is None:
-            WorkVolume.objects.create(
-                factory=factory,
-                start=start,
-                finish=finish,
-                weight=values["weight"],
-                created=created,
+        with transaction.atomic():
+            WorkVolume.objects.bulk_create(
+                [WorkVolume(
+                    factory=factory,
+                    start=start,
+                    finish=finish,
+                    weight=values["weight"],
+                    created=created,
+                )],
+                update_conflicts=True,
+                unique_fields=["factory", "start", "finish"],
+                update_fields=["weight", "created"],
             )
-        else:
-            volume.weight = values["weight"]
-            volume.created = created
-            volume.save(update_fields=["weight", "created"])
+            save_work_volume_record(
+                factory,
+                start,
+                finish,
+                values["weight"],
+                values["author"],
+                created,
+            )
 
-        save_work_volume_record(
-            factory,
-            start,
-            finish,
-            values["weight"],
-            values["author"],
-            created,
-        )
         return Response(status=201)
