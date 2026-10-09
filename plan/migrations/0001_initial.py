@@ -7,7 +7,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
@@ -16,36 +15,85 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='Factory',
+            name="Factory",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('external_id', models.UUIDField(default=uuid.uuid4, unique=True)),
-                ('name', models.CharField(max_length=255)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("external_id", models.UUIDField(default=uuid.uuid4, unique=True)),
+                ("name", models.CharField(max_length=255)),
             ],
         ),
         migrations.CreateModel(
-            name='FactoryUser',
+            name="FactoryUser",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('factory', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='plan.factory')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "factory",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="plan.factory"
+                    ),
+                ),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'constraints': [models.UniqueConstraint(fields=('user', 'factory'), name='unique_factory_user')],
+                "constraints": [
+                    models.UniqueConstraint(
+                        fields=("user", "factory"), name="unique_factory_user"
+                    )
+                ],
             },
         ),
         migrations.CreateModel(
-            name='WorkVolume',
+            name="WorkVolume",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('start', models.DateField()),
-                ('finish', models.DateField()),
-                ('weight', models.IntegerField()),
-                ('created', models.DateField()),
-                ('factory', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='plan.factory')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("start", models.DateField()),
+                ("finish", models.DateField()),
+                ("weight", models.IntegerField()),
+                ("created", models.DateField()),
+                (
+                    "factory",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="plan.factory"
+                    ),
+                ),
             ],
             options={
-                'constraints': [models.UniqueConstraint(fields=('factory', 'start', 'finish'), name='unique_work_volume_period')],
+                "constraints": [
+                    models.UniqueConstraint(
+                        fields=("factory", "start", "finish"),
+                        name="unique_work_volume_period",
+                    )
+                ],
             },
         ),
     ]
